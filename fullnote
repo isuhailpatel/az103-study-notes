@@ -1,0 +1,334 @@
+▲Azure Policy
+- evaluate resources for non-compliance with assigned policies (eg: allow only a certain SKU size of VM)
+- RBAC focuses on user actions at different scopes
+- Policy focuses on resource properties during deployment and for already existing resources
+- A policy assignment is a policy definition that has been assigned to take place within a specific scope (subscription, RG)
+- Policy assignments are inherited by all child resources (can exclude a subscope from policy assignment)
+- Azure Policy: default allow and explicit deny
+- initiative definition
+. collection of policy definitions tailored towards achieving a singular overarching goal
+. simplify managing and assigning policy definitions (grouping a set of policies as one single item)
+- recommend creating definitions at higher levels such as the management group or subscription level. Then, create the assignment at the next child level (assignment can be scoped down to a subscription or resource group within that management group)
+
+▲Azure subscription administrator
+- make a user an administrator of an Azure subscription by assign Owner role (an RBAC role) at subscription scope
+- Owner role gives user full access to all resources in subscription, including the right to delegate access to others
+
+▲Action Group
+- a collection of notification preferences defined by the owner of an Azure subscription
+- Azure Monitor and Service Health alerts use action groups to notify users that an alert has been triggered
+- Various alerts may use the same action group or different action groups 
+
+▲Metrics
+- All data collected by Azure Monitor fits into one of two fundamental types, metrics and logs
+- Metrics are numerical values that describe some aspect of a system at a particular time -> useful for alerting
+- Metrics stored for 93 days -> can copy to log for longer retain
+- Source of metrics
+. Platform metrics: created by Azure resource
+. Application metrics: created by Application Insights for monitored application
+. Custom metrics
+
+
+▲Lock resource
+- Can lock a subscription, resource group, or resource
+- 2 lock level
+. CannotDelete: authorized users can read/modify resource, but can't delete
+. ReadOnly: authorized users can read resource, but can't delete/update the resource
+- apply a lock at a parent scope -> all resources within that scope inherit same lock
+- The locks not restrict how resources perform their own functions (Eg: ReadOnly lock on SQL Server doesn't prevent from creating/updating DB inside SQL Server)
+
+▲Tags
+- retrieve all the resources in subscription with tag name and value
+- can use Azure Policy to enforce tagging rules and conventions
+- can create a policy to automatically applies the needed tags during deployment
+
+▲Move resource 
+- can move resources to either another subscription or another RG under same subscription
+- Both RG and the target group are locked during the move operation -> can't add/update/delete resource in RG. But resource is not frozen (Eg: when moving SQL Server, application still can write/read to SQL Server, no down-time)
+
+▲SAS
+- provides delegated access to resources in storage account
+- grant clients access without sharing account keys
+- Granular control 
+. interval over which the SAS is valid
+. permissions granted (eg: read but not delete)
+. optional IP or range of IP
+. protocol (eg: restrict to HTTPS only)
+- To revoke SAS explicitly
+. regenerate account key (but it will cause all app to fail to authorize)
+. stored access policy is deleted (should consider to use combined with SAS)
+
+▲Storage Analytics
+- performs logging and provides metrics data for a storage account
+- collect metrics (Storage Metrics) from storage accounts and log data (Storage Logging) about requests sent to storage account
+- 20 TB limit (independent with total limit of storage account)
+
+▲Logging and auditing
+- Activity logs
+. insight into operations performed on resources in subscription
+. determine “what, who, and when” for write operations (PUT, POST, or DELETE)
+. 90-day data-retention
+
+- Diagnostics logs
+. provide rich, frequent data about operation of Azure resource
+. Eg: Network Security Group rule counters
+
+
+- Azure AD audit report
+. identify privileged actions that occurred in the user's Azure AD instance
+. Eg: role creation or password resets, changing policy configurations 
+. 180 days retention
+
+- Network Watcher
+. NSG flow logs: view information about ingress and egress IP traffic through an NSG
+. variable packet capture allow create packet capture sessions to track traffic to and from a virtual machine. Captured data stored in local disk or storage blob. 5 hours time limit.
+. Diagnostics logs provide insights into the health of a resource
+. Traffic analytics analyzes Network Watcher network security group (NSG) flow logs to provide insights into traffic flow
+
+- Application Insights
+. monitor live web applications
+. automatically detects performance anomalies
+. works with .NET, Node.js, and Java EE
+
+- Azure Security Center
+. automatically collect security information from Azure resources, network, and connected partner solutions
+. analyzes information, often correlating information from multiple sources -> identify threats
+. Security alerts are prioritized in Security Center along with recommendations on how to remediate the threat
+
+▲Azure Import/Export
+- import large amounts of data to Azure Blob storage and Azure Files by shipping disk drives to an Azure data center then ship back 
+- Supply your own disk drives and transfer data
+- For disk drives supplied by MS, use Data Box Disk (total 40 TB per order)
+
+▲Azure File Sync
+- centralize your organization's file shares in Azure Files
+- Azure File Sync transforms Windows Server into a quick cache of Azure file share
+- can use any protocol that's available on Windows Server to access data locally (SMB, NFS, FTPS)
+
+※Terminology
+- Storage Sync Service
+. top-level Azure resource for Azure File Sync
+. create sync relationships with multiple storage accounts via multiple sync groups
+
+- Sync group
+. defines the sync topology for a set of files
+. need to add different endpoint to each sync group
+
+- Registered server
+. can register many servers to a Storage Sync Service 
+
+- Azure File Sync agent
+. downloadable package that enables Windows Server to be synced with Azure file share
+
+- Server endpoint
+. a specific location on a registered server
+
+- Cloud endpoint
+. An Azure file share that is part of a sync group
+
+▲Azure Backup report
+- supported for Azure virtual machine backup and file and folder backup to the cloud by using the Azure Recovery Services Agent
+- frequency of scheduled refresh for the reports is 24 hours in Power BI (can perform an ad hoc refresh)
+- takes around 24 hours for reporting data to start flowing in 
+
+▲Recovery Service vaults
+- a storage entity in Azure that houses data
+- hold backup data for various Azure services such as IaaS VMs (Linux or Windows) and Azure SQL databases
+- make it easy to organiz backup data while minimizing management overhead
+
+▲High Availability of IaaS VM
+- group two or more VM in an availability set
+- Each VM in availability set assigned an update domain and a fault domain
+- Fault domains define the group of VM that share a common power source and network switch
+- VM in same update domain will be restarted together during planned maintenance (Azure only restart 1 update domain at a time)
+- Managed disks provide better reliability for Availability Sets by ensuring disks of VMs in an Availability Set are sufficiently isolated from each other to avoid single points of failure
+
+- subscribe to Scheduled Events to get notified about upcoming maintenance events
+- should configure each app tier into separate availability sets
+
+- Combine Load Balancer with an availability set to get the most application resiliency
+
+▲Scale Set
+- allows to deploy and manage a set of identical, auto-scaling VM
+- can scale the number of VMs in the scale set manually, or define rules to autoscale based on resource usage like CPU, memory demand, or network traffic
+
+▲Custom Script Extension
+- downloads and executes scripts on Azure VM
+- useful for post deployment configuration, software installation, configuration/ management task
+- Scripts downloaded from Azure storage or GitHub, or provided to portal at extension run time
+- integrates with ARM templates, can be run using the Azure CLI, PowerShell, Azure portal or REST API
+
+▲Restore Azure VM
+- Create a new VM from a restore point
+- Restore a disk which can be used to create a new VM
+- Restore a disk and use it to replace a disk on the existing VM
+
+▲VNET peering
+- connect virtual networks
+- virtual networks can be in same region or different regions (Global VNet peering)
+
+
+▲VPN Gateway
+- a specific type of virtual network gateway used to send encrypted traffic between virtual network and on-premises location over Internet
+- can be used to send encrypted traffic between virtual networks over the Microsoft network
+- Each virtual network can have only one VPN gateway
+- can create multiple connections to the same VPN gateway (all VPN tunnels share the available gateway bandwidth)
+- A virtual network gateway is composed of two or more VM that are deployed to a specific subnet you create, which is called the gateway subnet
+- Virtual network gateway VMs are configured to contain routing tables and gateway services specific to the gateway 
+- can't directly configure VMs that are part of the virtual network gateway
+- should never deploy additional resources to the gateway subnet
+
+▲Internal DNS hostname resolution 
+- VM configured with Azure-managed DNS servers are able to resolve the hostnames of all VM within same virtual network to their private IP addresses
+- To resolve host names of VM in connected virtual networks, must use a custom DNS server.
+- If a VM has multiple network interfaces, or multiple IP configurations for a network interface -> hostname is mapped to private IP of primary IP configuration of primary network interface
+
+▲Metric Alert with Dynamic Thresholds detection
+- leverages advanced machine learning (ML) to learn metrics' historical behavior, identify patterns and anomalies that indicate possible service issues
+- Once an alert rule created, it will fire only when the monitored metric doesn’t behave as expected, based on its tailored thresholds
+
+▲Baseline Policy
+- a set of predefined policies that help protect organizations against many common attacks
+- Eg: Require MFA for admins
+
+▲Advisor 
+- a personalized cloud consultant that helps follow best practices to optimize Azure deployments
+- analyzes resource configuration and usage telemetry -> recommends solutions that can help improve cost effectiveness, performance, high availability, and security 
+
+▲Azure Activity Log 
+- provides insight into subscription-level events
+- collect Activity Log into a Log Analytics workspace 
+- use the Activity Log Analytics monitoring solution, which provides log queries and views for analyzing data
+
+▲Desired State Configuration (DSC)
+- manage/monitor configurations of VM
+- Configurations that drift from the desired configuration can be identified or auto-corrected
+
+▲Redeploy VM
+- If got difficulties troubleshooting RDP/SSH connection, redeploy might help
+- Azure will shut down VM -> move to new node within the Azure infrastructure -> power it back on, retaining all configuration and associated resources
+
+▲Cloud-init
+- customize a Linux VM as it boots for the first time
+- install packages and write files, or to configure users and security
+- runs during the initial boot proces
+
+▲Azure Storage
+- contains all data objects: blobs, files, queues, tables, and disks
+
+- Hot access tier: optimized for frequent access of objects
+- Cool access tier: optimized for storing large amounts of data that is infrequently accessed and stored for at least 30 days
+- Archive tier: available only for individual block blobs, optimized for data that can tolerate several hours of retrieval latency and remain in Archive tier for at least 180 days
+
+※Replication
+- Locally-redundant storage (LRS): data replicated within a single storage scale unit
+- Zone-redundant storage (ZRS): data replicated synchronously across 3 availability zones
+- Geo-redundant storage (GRS): Cross-regional replication to protect against region-wide unavailability
+- Read-access geo-redundant storage (RA-GRS): Cross-regional replication with read access to the replica
+
+※can grant access to data in storage account using
+. Azure AD
+. Shared Key authorization
+. Shared access signature
+
+※can copy data into storage account with
+- AzCopy
+- Data movement library
+- REST API or client library
+- Azure Import/Export service
+
+※Can grant access from individual IP or CIDR
+- Public IP only is allowed
+- IPv4 only
+- Can grant exception
+
+
+▲Azure AD
+- Every new Azure AD tenant has initial domain name, domainname.onmicrosoft.com
+- can't change/delete initial domain name
+- can add custom domain names -> copy DNS info -> add to domain registrar -> verify
+- Privileged Identity Management (PIM)
+. enable to manage, control, monitor access to important resources in organization
+. organizations want to minimize the number of people who have access to secure information or resources. However, users still need to carry out privileged operations in Azure AD, Azure, Office 365, or SaaS apps -> organizations can give users just-in-time (JIT) privileged access to Azure resources and Azure AD
+
+※Conditional access policies
+. enforced after first-factor authentication has been completed
+. not intended as a first line defense for scenarios like denial-of-service (DoS) attacks
+. utilize signals from events (e.g: sign-in risk level, location of the request, and so on) to determine access
+
+※Identity Protection enables organizations to configure automated responses to detected suspicious actions related to user identities
+. Detecting vulnerabilities and risky accounts
+. Investigating risk events
+. Risk-based conditional access policies
+
+※Device Management
+- Azure AD registered devices
+. for personal devices
+. manually register 
+- Azure AD joined devices
+. for devices owned by your organization and not joined to on-premises AD
+. manually register
+. change the local state of a device
+- Hybrid Azure AD joined devices for devices that are joined to an on-premises AD
+. for devices owned by your organization and joined to on-premises AD
+. automatically register 
+. change the local state of a device
+
+※With Windows 10, Azure AD users can securely synchronize their user settings and application settings data to the cloud
+- Enterprise State Roaming 
+. provides unified experience across Windows devices
+. reduces time needed for configuring new device
+
+※access reviews
+. enable organizations to efficiently manage group memberships, access to enterprise applications, and role assignments
+
+※Fraud alert
+. allow users to report fraud if they receive a two-step verification request that they didn't initiate
+
+※one-time bypass
+. allows user to authenticate a single time without performing two-step verification
+. bypass is temporary and expires after a specified number of seconds
+
+※Trusted IPs
+. used by administrators of a managed or federated tenant
+. bypasses two-step verification for users who sign in from the company intranet
+
+▲Event Grid
+- build applications with event-based architectures
+- support for your own events, using custom topics
+
+- dead letter location: need a storage account for holding events that can't be delivered to endpoint
+- retry policy: 24 hours (1440 minutes), or 30 times
+
+▲Service Bus 
+- fully managed enterprise integration message broker
+- most commonly used to decouple applications and services from each other
+- reliable and secure platform for asynchronous data and state transfer
+- data transferred between different applications and services using messages
+- message is in binary format, which can contain JSON, XML, or just text
+
+▲Azure Logic Apps
+- cloud service that helps schedule, automate, and orchestrate tasks, business processes, and workflows when need to integrate apps, data, systems, and services across enterprises or organizations
+
+▲App Service
+- App content and configurations elements can be swapped between two deployment slots, including production slot
+- can add Azure CDN to App Service web app
+
+※Security
+- default domain name (<app_name>.azurewebsites.net) already accessible using HTTPS
+- for custom domain -> secure with custom certificate
+. App Service certificate - created directly in Azure, secured in Azure Key Vault, imported into App Service app
+. Third-party certificate - upload custom SSL certificate and bind to App Service app
+- disable outdated protocols by enforcing TLS 1.1/1.2
+- Static IP restriction
+- provides turn-key authentication and authorization (Azure AD, Microsoft accounts, Facebook, Google, and Twitter)
+- Service-to-service authentication
+. create managed identity to authenticate with Azure SQL Database or Azure Key Vault
+. use Azure AD as authentication provide, App Service app perform delegated sign-in to a remote service (Azure AD Graph AP)
+- access resources in VNET through VNET integration
+- securely access on-premises resources
+- access application secrets using environment variables (configure in app setting) or integrate with Key Vault
+
+▲NSG traffic evaluation
+- inbound traffic: subnet's NSG first -> NIC's NSG
+- outbound traffic: NIC's NSG first -> subnet's NSG
